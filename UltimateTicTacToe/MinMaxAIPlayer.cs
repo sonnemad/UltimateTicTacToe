@@ -41,8 +41,8 @@ namespace UltimateTicTacToe
 
 		private void PopulateTree()
 		{
-			//Only allow to run for 5 seconds before stopping the population
-			DateTime endAfter = DateTime.UtcNow.AddSeconds(5);
+			//Only allow to run for 2 seconds before stopping the population
+			DateTime endAfter = DateTime.UtcNow.AddSeconds(2);
 			while(DateTime.UtcNow < endAfter)
 			{
 				AddDepthToGameTree();
