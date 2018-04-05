@@ -1,0 +1,118 @@
+﻿using System;
+
+namespace UltimateTicTacToe
+{
+	public class HumanConsolePlayer : ITicTacToePlayer
+	{
+		public HumanConsolePlayer(Player player)
+		{
+			Player = player;
+		}
+
+		private Player Player { get; }
+
+		Player ITicTacToePlayer.GetPlayer()
+		{
+			return Player;
+		}
+
+		UltimateTicTacToeMove ITicTacToePlayer.TakeTurn(UltimateTicTacToeBoard ticTacToeBoard)
+		{
+			Console.Clear();
+
+			Console.WriteLine(ticTacToeBoard.ToString());
+			Console.WriteLine();
+			if (ticTacToeBoard.LastMove != null)
+			{	
+				Console.WriteLine($"{ticTacToeBoard.LastMove.Player} made the move [{BoardToCell(ticTacToeBoard.LastMove.OuterCell)}:{BoardToCell(ticTacToeBoard.LastMove.InnerCell)}]");
+				Console.WriteLine("");
+			}
+			Console.WriteLine($"Player {Player}'s, Please make your move!");
+			byte outerCell;
+			if (ticTacToeBoard.RequiredOuterCell == null)
+			{
+				Console.Write("Outer Cell 1-9: ");
+				byte.TryParse(Console.ReadLine(), out outerCell);
+				outerCell = CellToBoard(outerCell);
+				Console.WriteLine();
+			}
+			else
+			{
+				outerCell = ticTacToeBoard.RequiredOuterCell.Value;
+			}
+			Console.Write("Inner Cell 1-9: ");
+			byte innerCell;
+			byte.TryParse(Console.ReadLine(), out innerCell);
+			innerCell = CellToBoard(innerCell);
+
+			return new UltimateTicTacToeMove(Player, outerCell, innerCell);
+		}
+
+		private byte CellToBoard(byte cell)
+		{
+			if (cell >= 7)
+			{
+				return (byte) (cell - 7);
+			}
+			if (cell <= 3)
+			{
+				return (byte) (cell + 5);
+			}
+			return (byte) (cell - 1);
+		}
+
+		private byte BoardToCell(byte cell)
+		{
+			if (cell <= 2)
+			{
+				return (byte)(cell + 7);
+			}
+			if (cell >= 6)
+			{
+				return (byte)(cell - 5);
+			}
+			return (byte)(cell + 1);
+		}
+	}
+
+
+	public class SimpleAIPlayer : ITicTacToePlayer
+	{
+		public SimpleAIPlayer(Player player)
+		{
+			Player = player;
+		}
+
+		private Player Player { get; }
+
+		Player ITicTacToePlayer.GetPlayer()
+		{
+			return Player;
+		}
+
+		UltimateTicTacToeMove ITicTacToePlayer.TakeTurn(UltimateTicTacToeBoard ticTacToeBoard)
+		{
+			byte outerCell;
+			if (ticTacToeBoard.RequiredOuterCell == null)
+			{
+				var validCells = ticTacToeBoard.GetValidOuterCells();
+				outerCell = validCells[new Random().Next(0, validCells.Count)];
+			}
+			else
+			{
+				outerCell = ticTacToeBoard.RequiredOuterCell.Value;
+			}
+
+			var validInnerCells = ticTacToeBoard.GetValidInnerCells(outerCell);
+			var innerCell = validInnerCells[new Random().Next(0, validInnerCells.Count)];
+
+			return new UltimateTicTacToeMove(Player, outerCell, innerCell);
+		}
+	}
+
+	internal interface ITicTacToePlayer
+	{
+		Player GetPlayer();
+		UltimateTicTacToeMove TakeTurn(UltimateTicTacToeBoard ticTacToeBoard);
+	}
+}
