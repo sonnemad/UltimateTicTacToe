@@ -52,7 +52,7 @@ namespace UltimateTicTacToe
 				var validMove = false;
 				while (!validMove)
 				{
-					var move = playerTurn == Player.X ? player1.TakeTurn(board) : player2.TakeTurn(board);
+					var move = playerTurn == Player.X ? player1.TakeTurn(board.Clone(cloneMoves: true)) : player2.TakeTurn(board.Clone(cloneMoves: true));
 
 					validMove = board.MakeMove(playerTurn, move.OuterCell, move.InnerCell);
 					if (!validMove)
@@ -61,8 +61,8 @@ namespace UltimateTicTacToe
 					}
 					else
 					{
-						Console.WriteLine($"{board.LastMove.Player} made the move [{board.LastMove.OuterCell}:{board.LastMove.InnerCell}]");
-						Console.WriteLine($"{board.State} : {board.GetValidOuterCells().Count}");
+						Console.Clear();
+						Console.WriteLine(board.ToString());
 					}
 				}
 				playerTurn = playerTurn == Player.X ? Player.O : Player.X;
@@ -71,7 +71,7 @@ namespace UltimateTicTacToe
 			Console.Clear();
 			Console.WriteLine(board.ToString());
 			Console.WriteLine($"Game has Ended: {board.State}");
-			Console.Write("Press any key to continue:");
+			Console.Write("Press enter to continue:");
 			Console.ReadLine();
 		}
 	}

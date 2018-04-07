@@ -41,8 +41,8 @@ namespace UltimateTicTacToe
 
 		private void PopulateTree()
 		{
-			//Only allow to run for 2 seconds before stopping the population
-			DateTime endAfter = DateTime.UtcNow.AddSeconds(2);
+			//Only allow to run for 5 seconds before stopping the population
+			DateTime endAfter = DateTime.UtcNow.AddSeconds(5);
 			while(DateTime.UtcNow < endAfter)
 			{
 				AddDepthToGameTree();
@@ -131,15 +131,6 @@ namespace UltimateTicTacToe
 			}
 		}
 
-//		private void ScoreLeafNodes()
-//		{
-//			var leafNodes = _gameTree.GetLeafNodes();
-//			foreach (var leaf in leafNodes)
-//			{
-//				ScoreNode(leaf);
-//			}
-//		}
-
 		private static short ScoreNode(GameTree leaf)
 		{
 			short score = 0;
@@ -156,18 +147,11 @@ namespace UltimateTicTacToe
 					break;
 				case GameState.Open:
 
-					short xWins = (short) (CountWins(Player.X, leaf.Data) * 10);
-					short oWins = (short) (CountWins(Player.O, leaf.Data) * 10);
+					var xWins = (short) (CountWins(Player.X, leaf.Data) * 10);
+					var oWins = (short) (CountWins(Player.O, leaf.Data) * 10);
 					score = (short)(xWins - oWins);
-						
-					foreach (var board in leaf.Data.GameBoard)
-					{
-						score += CalculateScore(board);
-					}
 
-//					score = CalculateScore(leaf.Data, 400, new[] {4});
-//					score += CalculateScore(leaf.Data, 300, new[] {0, 2, 6, 8});
-//					score += CalculateScore(leaf.Data, 200, new[] {1, 3, 5, 7});
+					score = leaf.Data.GameBoard.Aggregate(score, (current, board) => (short) (current + CalculateScore(board)));
 					break;
 			}
 			leaf.Score = score;
@@ -190,7 +174,6 @@ namespace UltimateTicTacToe
 		private static bool CanWin(Player player, UltimateTicTacToeBoard board, IEnumerable<int> cells)
 		{
 			var winState = player == Player.X ? GameState.Xwin : GameState.Owin;
-			//return cells.Select(cell => board.GameBoard.ElementAt(cell)).All(smallBoard => smallBoard.State == GameState.Open || smallBoard.State == winState);
 			return cells.All(cell => board.GameBoard.ElementAt(cell).State == GameState.Open || board.GameBoard.ElementAt(cell).State == winState);
 		}
 
@@ -227,29 +210,6 @@ namespace UltimateTicTacToe
 		{
 			return cells.All(cell => board.CellValue((byte) cell) == Player.Empty || board.CellValue((byte) cell) == player);
 		}
-
-//		private static short CalculateScore(UltimateTicTacToeBoard board, short value, IEnumerable<int> cells)
-//		{
-//			short score = 0;
-//			foreach (var cell in cells)
-//			{
-//				switch (board.GameBoard[cell].State)
-//				{
-//					case GameState.Xwin:
-//						score += value;
-//						break;
-//					case GameState.Owin:
-//						score -= value;
-//						break;
-//					case GameState.Open:
-//						var playerO = board.GameBoard[cell].GameBoard.Count(c => c == Player.O);
-//						var playerX = board.GameBoard[cell].GameBoard.Count(c => c == Player.X);
-//						score += (short) ((playerX - playerO)*(value/10));
-//						break;
-//				}
-//			}
-//			return score;
-//		}
 	}
 
 	internal class GameTree

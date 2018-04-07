@@ -23,7 +23,7 @@ namespace UltimateTicTacToe
 			Console.WriteLine(ticTacToeBoard.ToString());
 			Console.WriteLine();
 			if (ticTacToeBoard.LastMove != null)
-			{	
+			{
 				Console.WriteLine($"{ticTacToeBoard.LastMove.Player} made the move [{BoardToCell(ticTacToeBoard.LastMove.OuterCell)}:{BoardToCell(ticTacToeBoard.LastMove.InnerCell)}]");
 				Console.WriteLine("");
 			}
@@ -44,6 +44,10 @@ namespace UltimateTicTacToe
 			byte innerCell;
 			byte.TryParse(Console.ReadLine(), out innerCell);
 			innerCell = CellToBoard(innerCell);
+
+			ticTacToeBoard.MakeMove(Player, outerCell, innerCell);
+			Console.Clear();
+			Console.WriteLine(ticTacToeBoard.ToString());
 
 			return new UltimateTicTacToeMove(Player, outerCell, innerCell);
 		}

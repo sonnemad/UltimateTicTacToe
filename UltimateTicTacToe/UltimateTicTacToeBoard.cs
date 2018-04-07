@@ -72,12 +72,19 @@ namespace UltimateTicTacToe
 
 		public TicTacToeMove[] WinningMove { get; private set; }
 
-		public UltimateTicTacToeBoard Clone()
+		public UltimateTicTacToeBoard Clone(bool cloneMoves = false)
 		{
 			var clonedBoard = new UltimateTicTacToeBoard();
-			foreach (var move in _moves)
+			if (cloneMoves)
 			{
-				clonedBoard._moves.AddLast(move);
+				foreach (var move in _moves)
+				{
+					clonedBoard._moves.AddLast(move);
+				}
+			}
+			else if(_moves.Count >= 1)
+			{
+				clonedBoard._moves.AddLast(_moves.Last.Value);
 			}
 			clonedBoard.WinningMove = WinningMove;
 			clonedBoard.State = State;

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace UltimateTicTacToe
 {
@@ -46,7 +47,7 @@ namespace UltimateTicTacToe
 				return;
 			}
 
-			if (_moves.Count == 9)
+			if (!_grid.Any(cell => cell == Player.Empty))
 			{
 				//Last move was taken, game is either won by someone or a draw
 				// set as draw here and it will be overwritten by winning move below
@@ -92,12 +93,19 @@ namespace UltimateTicTacToe
 			}
 		}
 
-		internal TicTacToeBoard Clone()
+		internal TicTacToeBoard Clone(bool cloneMoves = false)
 		{
 			var clonedBoard = new TicTacToeBoard();
-			foreach (var move in _moves)
+			if (cloneMoves)
 			{
-				clonedBoard._moves.AddLast(move);
+				foreach (var move in _moves)
+				{
+					clonedBoard._moves.AddLast(move);
+				}
+			}
+			else if (_moves.Count >= 1)
+			{
+				clonedBoard._moves.AddLast(_moves.Last.Value);
 			}
 			clonedBoard.WinningMove = WinningMove;
 			clonedBoard.State = State;
