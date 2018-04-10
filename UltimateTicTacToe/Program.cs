@@ -6,11 +6,12 @@ namespace UltimateTicTacToe
 	{
 		private static void Main()
 		{
-			var board = new UltimateTicTacToeBoard();
+            var board = new UltimateTicTacToeBoard();
 
 			ITicTacToePlayer player1 = new HumanConsolePlayer(Player.X);
 			ITicTacToePlayer player2 = new HumanConsolePlayer(Player.O);
 
+			Console.SetWindowSize(80, 48);
 			Console.WriteLine("Ultimate Tic Tac Toe!!!");
 
 			bool correctPlayers = false;
@@ -42,9 +43,13 @@ namespace UltimateTicTacToe
 				}
 				if (!correctPlayers)
 				{
-					Console.WriteLine("Wrong Pondo, try again!");
+					Console.WriteLine("No Pondo, try again!");
 				}
 			}
+
+            Taunt myTaunt = delegate(string msg) { Console.WriteLine(msg); };
+            player1.SetTauntDelegate(myTaunt);
+            player2.SetTauntDelegate(myTaunt);
 
 			var playerTurn = Player.X;
 			while (board.State == GameState.Open)
@@ -70,9 +75,10 @@ namespace UltimateTicTacToe
 
 			Console.Clear();
 			Console.WriteLine(board.ToString());
-			Console.WriteLine($"Game has Ended: {board.State}");
-			Console.Write("Press enter to continue:");
-			Console.ReadLine();
+            var stateStr = board.State == GameState.Draw ? "DRAW!" : board.State == GameState.Xwin ? "Player X Wins!" : "Player O Wins!";
+			Console.WriteLine("Game has Ended: " + stateStr);
+			Console.Write("Press any key to continue:");
+			Console.ReadKey();
 		}
 	}
 }

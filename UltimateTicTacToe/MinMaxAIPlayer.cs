@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 namespace UltimateTicTacToe
 {
@@ -20,11 +21,37 @@ namespace UltimateTicTacToe
 			return Player;
 		}
 
+        private Taunt _taunt;
+		public void SetTauntDelegate(Taunt taunt)
+		{
+			_taunt = taunt;
+        }
+
 		public UltimateTicTacToeMove TakeTurn(UltimateTicTacToeBoard ticTacToeBoard)
 		{
-			Console.WriteLine("Planning My Move...");
+            //Taunt the player if they played well!
+			if (_gameTree?.Children != null && _gameTree.Children.Count != 0)
+			{
+				var lowScore = _gameTree.Children.Min(node => node.Score);
+				var highScore = _gameTree.Children.Max(node => node.Score);
+				var bestMove = Player == Player.X ? highScore : lowScore;
+				var worstMove = Player == Player.O ? highScore : lowScore;
+				var bestPlayedMoves = _gameTree.Children.Where(child => child.Score == bestMove);
+				var worstPlayedMoves = _gameTree.Children.Where(child => child.Score == worstMove);
+				if (bestPlayedMoves.Any(b => b.Data.LastMove == ticTacToeBoard.LastMove))
+				{
+					_taunt("Nice Move Pondo!");
+					Thread.Sleep(timeout: new TimeSpan(0, 0, 5));
+				} else if (worstPlayedMoves.Any(b => b.Data.LastMove == ticTacToeBoard.LastMove))
+				{
+					_taunt("What are you thinking?");
+					Thread.Sleep(timeout: new TimeSpan(0, 0, 5));
+				}
+			}
 
-			Debug.WriteLine($"There were {_gameTree?.GetNodeCount() ?? 0} nodes in the tree prior to this move.");
+			_taunt("Planning My Move...");
+
+			Debug.WriteLine($"There were {_gameTree?.GetNodeCount()} nodes in the tree prior to this move.");
 			GameTree currentTree = _gameTree?.GetNode(ticTacToeBoard);
 			_gameTree = currentTree ?? new GameTree(data: ticTacToeBoard.Clone());
 			Debug.WriteLine($"Tree Triming reduced it to {_gameTree.GetNodeCount()} nodes.");
@@ -34,15 +61,15 @@ namespace UltimateTicTacToe
 			Debug.WriteLine($"Memory Used {GC.GetTotalMemory(false)}");
 			PopulateTree();
 			Debug.WriteLine($"Memory Used {GC.GetTotalMemory(false)}");
-			Debug.WriteLine($"Tree population increased it to {_gameTree.GetNodeCount()} nodes.");
+			Debug.WriteLine($"Tree population increased it to {_gameTree.GetNodeCount()} nodes at a depth of {_gameTree.GetTreeDepth()}.");
 			var move = MinMax();
 			return move;
 		}
 
 		private void PopulateTree()
 		{
-			//Only allow to run for 5 seconds before stopping the population
-			DateTime endAfter = DateTime.UtcNow.AddSeconds(5);
+			//Only allow to run for 3 seconds before stopping the population
+			DateTime endAfter = DateTime.UtcNow.AddSeconds(2);
 			while(DateTime.UtcNow < endAfter)
 			{
 				AddDepthToGameTree();
@@ -67,10 +94,19 @@ namespace UltimateTicTacToe
 					foreach (var innerCell in validInnerCells)
 					{
 						var gameBoard = gameTreeLeaf.Data.Clone();
-						var valid = gameBoard.MakeMove(gameBoard.CurrentPlayer, outerCell, innerCell);
+                        var currentPlayer = gameBoard.CurrentPlayer;
+						var valid = gameBoard.MakeMove(currentPlayer, outerCell, innerCell);
 						if (!valid) continue;
 						nodes++;
 						gameTreeLeaf.AddChild(gameBoard);
+						if( (gameBoard.State == GameState.Owin && currentPlayer == Player.O) || (gameBoard.State == GameState.Xwin && currentPlayer == Player.X) ){
+							Debug.WriteLine($"Found a Win Scenario for {currentPlayer}");
+							if (currentPlayer == Player)
+							{
+								_taunt("I've got a way to win!");
+							}
+							return;
+						}
 					}
 				}
 			}
@@ -80,18 +116,22 @@ namespace UltimateTicTacToe
 		private UltimateTicTacToeMove MinMax()
 		{
 			var minMax = AlphaBeta(_gameTree, short.MinValue + 10, short.MaxValue - 10, Player == Player.X);
-			var lowScore = _gameTree.GetLeafNodes().Min(node => node.Score);
+			
+            var lowScore = _gameTree.GetLeafNodes().Min(node => node.Score);
 			var highScore = _gameTree.GetLeafNodes().Max(node => node.Score);
+            Debug.WriteLine($"MinMax:{minMax}, Low:{lowScore}, High:{highScore}");
+            Debug.WriteLine($"I'm looking ahead {_gameTree.GetTreeDepth()} moves!");
 
-			if ((Player == Player.X && highScore >= 5000) || (Player == Player.O && lowScore <= -5000))
+			if ((Player == Player.X && highScore >= 500) || (Player == Player.O && lowScore <= -500))
 			{
-				Console.WriteLine("I can see a way for me to WIN!!!");
+                _taunt("I see a way for me to WIN!!!");
 			}
 
 			var possibleMoves = _gameTree.Children.Where(child => child.Score == minMax);
 
 			// ReSharper disable PossibleMultipleEnumeration
 			var index = new Random().Next(0, possibleMoves.Count());
+            _gameTree = possibleMoves.ElementAt(index); //Update the game state to the move chosen
 			return possibleMoves.ElementAt(index).Data.LastMove;
 			// ReSharper restore PossibleMultipleEnumeration
 		}
@@ -260,6 +300,26 @@ namespace UltimateTicTacToe
 			}
 			return nodeCount;
 		}
+
+        internal int GetTreeDepth()
+        {
+            return GetTreeDepth(0);
+        }
+
+        private int GetTreeDepth(int depth)
+        {
+            var treeDepth = depth + 1;
+            if(Children == null || Children.Count == 0){
+                return treeDepth;
+            }
+            foreach ( var child in Children)
+            {
+                treeDepth = Math.Max(treeDepth, child.GetTreeDepth(depth + 1));
+            }
+            return treeDepth;
+        }
+
+
 
 		internal List<GameTree> GetLeafNodes()
 		{
