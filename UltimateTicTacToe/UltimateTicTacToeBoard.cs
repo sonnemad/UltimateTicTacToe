@@ -278,5 +278,11 @@ namespace UltimateTicTacToe
 			OuterCell = outerCell;
 			_move = new TicTacToeMove(player, innerCell);
 		}
+
+		public override bool Equals(object obj)
+		{
+
+			return base.Equals(obj);
+		}
 	}
 }
