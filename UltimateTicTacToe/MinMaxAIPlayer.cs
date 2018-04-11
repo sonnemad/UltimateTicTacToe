@@ -38,11 +38,11 @@ namespace UltimateTicTacToe
 				var worstMove = Player == Player.O ? highScore : lowScore;
 				var bestPlayedMoves = _gameTree.Children.Where(child => child.Score == bestMove);
 				var worstPlayedMoves = _gameTree.Children.Where(child => child.Score == worstMove);
-				if (bestPlayedMoves.Any(b => b.Data.LastMove == ticTacToeBoard.LastMove))
+				if (bestPlayedMoves.Any(b => b.Data.LastMove.Equals(ticTacToeBoard.LastMove)))
 				{
 					_taunt("Nice Move Pondo!");
 					Thread.Sleep(timeout: new TimeSpan(0, 0, 5));
-				} else if (worstPlayedMoves.Any(b => b.Data.LastMove == ticTacToeBoard.LastMove))
+				} else if (worstPlayedMoves.Any(b => b.Data.LastMove.Equals(ticTacToeBoard.LastMove)))
 				{
 					_taunt("What are you thinking?");
 					Thread.Sleep(timeout: new TimeSpan(0, 0, 5));
@@ -68,9 +68,7 @@ namespace UltimateTicTacToe
 
 		private void PopulateTree()
 		{
-			//Only allow to run for 3 seconds before stopping the population
-			DateTime endAfter = DateTime.UtcNow.AddSeconds(2);
-			while(DateTime.UtcNow < endAfter)
+			while(_gameTree.GetNodeCount() < 100000 && _gameTree.GetTreeDepth() < 25)
 			{
 				AddDepthToGameTree();
 			}
@@ -86,6 +84,7 @@ namespace UltimateTicTacToe
 				//Don't Generate more leafs for completetd games
 				if (gameTreeLeaf.Data.State != GameState.Open)
 					continue;
+
 				var validOuterCells = gameTreeLeaf.Data.GetValidOuterCells();
 				foreach (var outerCell in validOuterCells)
 				{
@@ -99,14 +98,13 @@ namespace UltimateTicTacToe
 						if (!valid) continue;
 						nodes++;
 						gameTreeLeaf.AddChild(gameBoard);
-						if( (gameBoard.State == GameState.Owin && currentPlayer == Player.O) || (gameBoard.State == GameState.Xwin && currentPlayer == Player.X) ){
-							Debug.WriteLine($"Found a Win Scenario for {currentPlayer}");
-							if (currentPlayer == Player)
-							{
-								_taunt("I've got a way to win!");
-							}
-							return;
+						if ((gameBoard.State != GameState.Owin || currentPlayer != Player.O) &&
+						    (gameBoard.State != GameState.Xwin || currentPlayer != Player.X)) continue;
+						if (currentPlayer == Player)
+						{
+							_taunt("I've got a way to win!");
 						}
+						return;
 					}
 				}
 			}
@@ -122,7 +120,7 @@ namespace UltimateTicTacToe
             Debug.WriteLine($"MinMax:{minMax}, Low:{lowScore}, High:{highScore}");
             Debug.WriteLine($"I'm looking ahead {_gameTree.GetTreeDepth()} moves!");
 
-			if ((Player == Player.X && highScore >= 500) || (Player == Player.O && lowScore <= -500))
+			if ((Player == Player.X && highScore >= 10000) || (Player == Player.O && lowScore <= -10000))
 			{
                 _taunt("I see a way for me to WIN!!!");
 			}
