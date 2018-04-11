@@ -68,13 +68,21 @@ namespace UltimateTicTacToe
 
 		private void PopulateTree()
 		{
-			while(_gameTree.GetNodeCount() < 100000 && _gameTree.GetTreeDepth() < 25)
+			bool continueAddingNodes = true;
+			while(continueAddingNodes && _gameTree.GetNodeCount() < 100000 && _gameTree.GetTreeDepth() < 30)
 			{
-				AddDepthToGameTree();
+				var startAdd = DateTime.UtcNow;
+				var nodesAdded = AddDepthToGameTree();
+				var runtime = DateTime.UtcNow.Subtract(startAdd);
+				if (runtime.TotalSeconds >= 5 || (_gameTree.GetTreeDepth() >= 10 && nodesAdded <= 10))
+				{
+					//diminishing returns, we're 10+ moves deep and adding less than 10 scenarios each round
+					continueAddingNodes = false;
+				}
 			}
 		}
 
-		private void AddDepthToGameTree()
+		private int AddDepthToGameTree()
 		{
 			var gameBoardLeafs = _gameTree.GetLeafNodes();
 			var nodes = 0;
@@ -104,11 +112,12 @@ namespace UltimateTicTacToe
 						{
 							_taunt("I've got a way to win!");
 						}
-						return;
+						return nodes;
 					}
 				}
 			}
 			Debug.WriteLine($"{Player} Created {nodes} new nodes within the tree");
+			return nodes;
 		}
 
 		private UltimateTicTacToeMove MinMax()

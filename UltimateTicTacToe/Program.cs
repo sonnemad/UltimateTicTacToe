@@ -1,15 +1,16 @@
 ﻿using System;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace UltimateTicTacToe
 {
 	internal class Program
 	{
-		private static TimeSpan playtime = new TimeSpan(0, 0, 0);
-		private static TimeSpan totalPlaytime = new TimeSpan(0, 0, 0);
-		private static int xWins = 0;
-		private static int oWins = 0;
-		private static int draws = 0;
+		private static TimeSpan _playtime = new TimeSpan(0, 0, 0);
+		private static TimeSpan _totalPlaytime = new TimeSpan(0, 0, 0);
+		private static int _xWins = 0;
+		private static int _oWins = 0;
+		private static int _draws = 0;
 
 		private static void Main()
 		{
@@ -68,19 +69,19 @@ namespace UltimateTicTacToe
 
 			var startTime = DateTime.UtcNow;
 
-			var player1LastTaunt = "";
+			string[] player1LastTaunt = {""};
 			Taunt p1Taunt = delegate(string msg)
 			{
-				if (player1LastTaunt.Equals(msg)) return;
-				player1LastTaunt = msg;
+				if (player1LastTaunt[0].Equals(msg)) return;
+				player1LastTaunt[0] = msg;
 	            Console.WriteLine(msg);
             };
             player1.SetTauntDelegate(p1Taunt);
-			var player2LastTaunt = "";
+			string[] player2LastTaunt = {""};
 			Taunt p2Taunt = delegate (string msg)
 			{
-				if (player2LastTaunt.Equals(msg)) return;
-				player2LastTaunt = msg;
+				if (player2LastTaunt[0].Equals(msg)) return;
+				player2LastTaunt[0] = msg;
 				Console.WriteLine(msg);
 			};
 			player2.SetTauntDelegate(p2Taunt);
@@ -88,6 +89,8 @@ namespace UltimateTicTacToe
 			var playerTurn = Player.X;
 			while (board.State == GameState.Open)
 			{
+				player1LastTaunt[0] = "";
+				player2LastTaunt[0] = "";
 				var validMove = false;
 				while (!validMove)
 				{
@@ -110,23 +113,24 @@ namespace UltimateTicTacToe
 			}
 
 			var gameTime = DateTime.UtcNow.Subtract(startTime);
-			playtime = playtime.Add(gameTime);
+			_playtime = _playtime.Add(gameTime);
+			_totalPlaytime = _totalPlaytime.Add(gameTime);
 
 			string stateStr = null;
 			switch (board.State)
 			{
 				case GameState.Xwin:
-					xWins++;
+					_xWins++;
 					stateStr = "Player X Wins!";
 					break;
 				case GameState.Owin:
-					oWins++;
+					_oWins++;
 					stateStr = "Player O Wins!";
 					break;
 				case GameState.Open:
 					break;
 				case GameState.Draw:
-					draws++;
+					_draws++;
 					stateStr = "DRAW!";
 					break;
 				default:
@@ -144,24 +148,24 @@ namespace UltimateTicTacToe
 
 		private static void WriteMoves(UltimateTicTacToeBoard board)
 		{
-//			//open file stream
-//			string fileName = DateTime.UtcNow.ToString("yyyymmddhhrrmm") + ".json";
-//			using (StreamWriter file = File.CreateText($"./{fileName}"))
-//			{
-//				JsonSerializer serializer = new JsonSerializer();
-//				//serialize object directly into file stream
-//				serializer.Serialize(file, board.Moves);
-//			}
+			//open file stream
+			string fileName = DateTime.UtcNow.ToString("yyyymmddhhmm") + ".json";
+			using (StreamWriter file = File.CreateText($"./{fileName}"))
+			{
+				JsonSerializer serializer = new JsonSerializer();
+				//serialize object directly into file stream
+				serializer.Serialize(file, board.Moves);
+			}
 		}
 
 		private static string GetCurrentGameStats(TimeSpan time)
 		{
-			return $"Current Playtime {totalPlaytime.ToString("c")}  Total Playtime {time.ToString("c")}   Records: X{xWins},O{oWins},Draw{draws}";
+			return $"Playtime {time.ToString(@"mm\:ss")}  Total Playtime {_totalPlaytime.Add(time).ToString(@"hh\:mm\:ss")}   Records: X:{_xWins} O:{_oWins} Draw:{_draws}";
 		}
 
 		private static string GetGameStats()
 		{
-			return $"Total Playtime {totalPlaytime.ToString("c")}  Last Game Playtime {playtime.ToString("c")}   Records: X{xWins},O{oWins},Draw{draws}";
+			return $"Total Playtime {_totalPlaytime.ToString(@"hh\:mm\:ss")}  Last Game {_playtime.ToString(@"mm\:ss")}   Records: X:{_xWins} O:{_oWins} Draw:{_draws}";
 		}
 	}
 }
