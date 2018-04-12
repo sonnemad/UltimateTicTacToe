@@ -19,9 +19,9 @@ namespace UltimateTicTacToe
 			{
 				PlayGame();
 
-				Console.WriteLine("Would you like to play again (y/n) ?");
-				var response = Console.ReadLine();
-				playAgain = response?.StartsWith("y", StringComparison.InvariantCultureIgnoreCase) == true;
+//				Console.WriteLine("Would you like to play again (y/n) ?");
+//				var response = Console.ReadLine();
+//				playAgain = response?.StartsWith("y", StringComparison.InvariantCultureIgnoreCase) == true;
 			}
 		}
 
@@ -38,8 +38,8 @@ namespace UltimateTicTacToe
 			while (!correctPlayers)
 			{
 				Console.Write("How Many Players? ");
-				int players;
-				correctPlayers = int.TryParse(Console.ReadLine(), out players);
+				int players = 0;
+				correctPlayers = true;//int.TryParse(Console.ReadLine(), out players);
 				if (correctPlayers)
 				{
 					if (players == 2)
@@ -53,7 +53,7 @@ namespace UltimateTicTacToe
 					}
 					else if (players == 0)
 					{
-						player1 = new MinMaxAIPlayer(Player.X);
+						player1 = new MinMaxAIPlayerV1(Player.X);
 						player2 = new MinMaxAIPlayer(Player.O);
 					}
 					else
@@ -94,6 +94,23 @@ namespace UltimateTicTacToe
 				var validMove = false;
 				while (!validMove)
 				{
+//					if (board.LastMove == null)
+//					{
+//						string jsonData = File.ReadAllText($"./201807110607.json").ToString();
+//						dynamic jsonObject = JsonConvert.DeserializeObject(jsonData);
+//
+//						foreach (var jsonMove in jsonObject)
+//						{
+//							string player = jsonMove.Player == 1 ? Player.X.ToString() : Player.O.ToString();
+//							Console.WriteLine($"Making Move [{player}, {jsonMove.OuterCell}:{jsonMove.InnerCell}]");
+//							board.MakeMove(jsonMove.Player == 1 ? Player.X : Player.O, (byte)jsonMove.OuterCell, (byte)jsonMove.InnerCell);
+//							if (jsonMove.OuterCell == 3 && jsonMove.InnerCell == 5)
+//							{
+//								playerTurn = playerTurn == Player.X ? Player.O : Player.X;
+//								break;
+//							}
+//						}
+//					}
 					var move = playerTurn == Player.X ? player1.TakeTurn(board.Clone(cloneMoves: true)) : player2.TakeTurn(board.Clone(cloneMoves: true));
 
 					validMove = board.MakeMove(playerTurn, move.OuterCell, move.InnerCell);
