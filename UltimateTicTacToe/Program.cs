@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using Newtonsoft.Json;
 
 namespace UltimateTicTacToe
 {
@@ -94,23 +92,6 @@ namespace UltimateTicTacToe
 				var validMove = false;
 				while (!validMove)
 				{
-//					if (board.LastMove == null)
-//					{
-//						string jsonData = File.ReadAllText($"./201807110607.json").ToString();
-//						dynamic jsonObject = JsonConvert.DeserializeObject(jsonData);
-//
-//						foreach (var jsonMove in jsonObject)
-//						{
-//							string player = jsonMove.Player == 1 ? Player.X.ToString() : Player.O.ToString();
-//							Console.WriteLine($"Making Move [{player}, {jsonMove.OuterCell}:{jsonMove.InnerCell}]");
-//							board.MakeMove(jsonMove.Player == 1 ? Player.X : Player.O, (byte)jsonMove.OuterCell, (byte)jsonMove.InnerCell);
-//							if (jsonMove.OuterCell == 3 && jsonMove.InnerCell == 5)
-//							{
-//								playerTurn = playerTurn == Player.X ? Player.O : Player.X;
-//								break;
-//							}
-//						}
-//					}
 					var move = playerTurn == Player.X ? player1.TakeTurn(board.Clone(cloneMoves: true)) : player2.TakeTurn(board.Clone(cloneMoves: true));
 
 					validMove = board.MakeMove(playerTurn, move.OuterCell, move.InnerCell);
@@ -159,20 +140,6 @@ namespace UltimateTicTacToe
 			Console.WriteLine();
 			Console.WriteLine(board.ToString());
 			Console.WriteLine("Game has Ended: " + stateStr);
-
-			WriteMoves(board);
-		}
-
-		private static void WriteMoves(UltimateTicTacToeBoard board)
-		{
-			//open file stream
-			string fileName = DateTime.UtcNow.ToString("yyyymmddhhmm") + ".json";
-			using (StreamWriter file = File.CreateText($"./{fileName}"))
-			{
-				JsonSerializer serializer = new JsonSerializer();
-				//serialize object directly into file stream
-				serializer.Serialize(file, board.Moves);
-			}
 		}
 
 		private static string GetCurrentGameStats(TimeSpan time)
