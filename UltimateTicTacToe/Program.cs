@@ -17,9 +17,9 @@ namespace UltimateTicTacToe
 			{
 				PlayGame();
 
-//				Console.WriteLine("Would you like to play again (y/n) ?");
-//				var response = Console.ReadLine();
-//				playAgain = response?.StartsWith("y", StringComparison.InvariantCultureIgnoreCase) == true;
+				Console.WriteLine("Would you like to play again (y/n) ?");
+				var response = Console.ReadLine();
+				playAgain = response?.StartsWith("y", StringComparison.InvariantCultureIgnoreCase) == true;
 			}
 		}
 
@@ -36,8 +36,8 @@ namespace UltimateTicTacToe
 			while (!correctPlayers)
 			{
 				Console.Write("How Many Players? ");
-				int players = 0;
-				correctPlayers = true;//int.TryParse(Console.ReadLine(), out players);
+				int players;
+				correctPlayers = int.TryParse(Console.ReadLine(), out players);
 				if (correctPlayers)
 				{
 					if (players == 2)
@@ -46,12 +46,26 @@ namespace UltimateTicTacToe
 						player2 = new HumanConsolePlayer(Player.O);
 					} else if (players == 1)
 					{
-						player1 = new HumanConsolePlayer(Player.X);
-						player2 = new MinMaxAIPlayer(Player.O);
+						Console.WriteLine("Do you want to play as X or O?");
+						var response = Console.ReadLine();
+						if (response?.StartsWith("x", StringComparison.InvariantCultureIgnoreCase) == true)
+						{
+							player1 = new HumanConsolePlayer(Player.X);
+							player2 = new MinMaxAIPlayer(Player.O);
+						}
+						else if (response?.StartsWith("o", StringComparison.InvariantCultureIgnoreCase) == true)
+						{
+							player1 = new MinMaxAIPlayer(Player.X);
+							player2 = new HumanConsolePlayer(Player.O);
+						}
+						else
+						{
+							correctPlayers = false;
+						}
 					}
 					else if (players == 0)
 					{
-						player1 = new MinMaxAIPlayerV1(Player.X);
+						player1 = new MinMaxAIPlayer(Player.X);
 						player2 = new MinMaxAIPlayer(Player.O);
 					}
 					else
@@ -61,7 +75,7 @@ namespace UltimateTicTacToe
 				}
 				if (!correctPlayers)
 				{
-					Console.WriteLine("No Pondo, try again!");
+					Console.WriteLine("Sorry kiddums, try again!");
 				}
 			}
 
@@ -97,7 +111,7 @@ namespace UltimateTicTacToe
 					validMove = board.MakeMove(playerTurn, move.OuterCell, move.InnerCell);
 					if (!validMove)
 					{
-						Console.WriteLine("Invalid selection, try again");
+						Console.WriteLine("Sorry kiddums, try again!");
 					}
 					else
 					{

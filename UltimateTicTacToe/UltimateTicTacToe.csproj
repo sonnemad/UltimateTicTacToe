@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MinMaxAIPlayerV1.cs" />
     <Compile Include="MinMaxAIPlayer.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />

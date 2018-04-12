@@ -42,11 +42,12 @@ namespace UltimateTicTacToe
 				var worstMove = Player == Player.X ? highScore : lowScore;
 				var bestPlayedMoves = _gameTree.Children.Where(child => child.Score == bestMove);
 				var worstPlayedMoves = _gameTree.Children.Where(child => child.Score == worstMove);
-				if (bestPlayedMoves.Contains(currentTree))
+				var playedMoves = bestPlayedMoves as IList<GameTree> ?? bestPlayedMoves.ToList();
+				if (playedMoves.Contains(currentTree) && playedMoves.Count == 1 && Math.Abs(bestMove - worstMove) > 250)
 				{
-					_taunt("Nice Move Pondo!");
+					_taunt("Nice Move Kiddums!");
 					Thread.Sleep(timeout: new TimeSpan(0, 0, 5));
-				} else if (worstPlayedMoves.Contains(currentTree))
+				} else if (worstPlayedMoves.Contains(currentTree) && Math.Abs(bestMove - worstMove) > 250)
 				{
 					_taunt("What are you thinking?");
 					Thread.Sleep(timeout: new TimeSpan(0, 0, 5));
@@ -74,7 +75,7 @@ namespace UltimateTicTacToe
 			{
 				var nodesAdded = AddDepthToGameTree();
 				var runtime = DateTime.UtcNow.Subtract(startAdd);
-				if (runtime.TotalSeconds >= 5 || (_gameTree.GetTreeDepth() >= 10 && nodesAdded <= 10))
+				if (runtime.TotalSeconds >= 5 || (_gameTree.GetTreeDepth() >= 15 && nodesAdded <= 10))
 				{
 					//diminishing returns, we're 10+ moves deep and adding less than 10 scenarios each round
 					continueAddingNodes = false;
@@ -110,9 +111,9 @@ namespace UltimateTicTacToe
 						if ((gameBoard.State == GameState.Xwin && currentPlayer == Player.X) ||
 						    (gameBoard.State == GameState.Owin && currentPlayer == Player.O))
 						{
-							if (currentPlayer == Player)
+							if (currentPlayer == Player && _gameTree.GetTreeDepth() < 8)
 							{
-								_taunt("I've got a way to win!");
+								_taunt($"I've got a way to win in {_gameTree.GetTreeDepth()} moves!");
 							}
 							breakForWin = true;
 							break;
@@ -130,15 +131,8 @@ namespace UltimateTicTacToe
 		{
 			var minMax = AlphaBeta(_gameTree, short.MinValue + 10, short.MaxValue - 10, Player == Player.X);
 			
-            var lowScore = _gameTree.GetLeafNodes().Min(node => node.Score);
-			var highScore = _gameTree.GetLeafNodes().Max(node => node.Score);
-            Debug.WriteLine($"MinMax:{minMax}, Low:{lowScore}, High:{highScore}");
+            Debug.WriteLine($"MinMax:{minMax}, Low:{_gameTree.GetLeafNodes().Min(node => node.Score)}, High:{_gameTree.GetLeafNodes().Max(node => node.Score)}");
             Debug.WriteLine($"I'm looking ahead {_gameTree.GetTreeDepth()} moves!");
-
-			if ((Player == Player.X && highScore >= 10000) || (Player == Player.O && lowScore <= -10000))
-			{
-                _taunt("I see a way for me to WIN!!!");
-			}
 
 			var possibleMoves = _gameTree.Children.Where(child => child.Score == minMax);
 
@@ -348,7 +342,7 @@ namespace UltimateTicTacToe
 			return leafNodes;
 		}
 
-		private List<GameTree> GetLeafNodes(List<GameTree> children)
+		private static IEnumerable<GameTree> GetLeafNodes(List<GameTree> children)
 		{
 			var leafNodes = new List<GameTree>();
 			foreach (var childNode in children)
