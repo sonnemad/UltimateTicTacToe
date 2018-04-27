@@ -8,9 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("UltimateTicTacToe")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Johnson Controls")]
 [assembly: AssemblyProduct("UltimateTicTacToe")]
-[assembly: AssemblyCopyright("Copyright © Johnson Controls 2018")]
+[assembly: AssemblyCopyright("Copyright © Dan Sonnemann 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
